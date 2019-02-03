@@ -1,6 +1,11 @@
 (ns game-of-life.core
   (:gen-class))
-
+(defn neighbours [[x y]]
+  (for [dx [-1 0 1] dy [-1 0 1] :when (not= 0 dx dy)]
+    [(+ x dx) (+ y dy)]))
+(defn step [cells]
+  (apply hash-set (map first (filter #(or (= 3 (second %)) (and (= 2 (second %)) (cells (first %))))
+                                     (frequencies (apply concat (map neighbours cells)))))))
 (defn draw
   [w h step cells]
   (let [state (atom cells)
@@ -26,7 +31,6 @@
               (Thread/sleep 80)
               (swap! state step)
               (.repaint pane)))))
-
 (defn -main
   [& args]
-  (draw 100 100 identity #{[15 15] [15 17] [16 16] [15 16]}))
+  (draw 100 100 step #{[15 15] [15 17] [16 16] [15 16]}))
